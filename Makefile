@@ -35,6 +35,6 @@ down: ./Dockerfile
 	docker compose down
 	docker rmi ${IMAGE_NAME}
 
-## Builds the flink base image with pyFlink and the flink-sql kafka connector installed
+## Builds the flink base image with pyFlink and the flink-sql kafka connector installed.
 build: ./Dockerfile
 	docker build --platform linux/amd64 -t ${IMAGE_NAME} .

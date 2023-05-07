@@ -3,6 +3,8 @@
 FROM apache/flink:1.17.0-scala_2.12-java11
 ARG FLINK_VERSION=1.17.0
 ARG PYTHON_VERSION=3.10
+ARG ICEBERG_VERSION=1.2.1
+ARG ICEBERG_FLINK_RUNTIME_VERSION=1.14
 # Install pre-reqs to add new PPA
 RUN set -ex; \
     apt-get update && \
@@ -36,8 +38,18 @@ RUN python${PYTHON_VERSION} -m pip install --upgrade pip; \
     pip install apache-flink==${FLINK_VERSION}; \
     pip install kafka-python;
 
-# # Download connector libraries
-RUN wget -P /opt/flink/lib/ https://repo.maven.apache.org/maven2/org/apache/flink/flink-json/${FLINK_VERSION}/flink-json-${FLINK_VERSION}.jar; \
-    wget -P /opt/flink/lib/ https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/${FLINK_VERSION}/flink-sql-connector-kafka-${FLINK_VERSION}.jar;
+# Download connector libraries
+ARG FLINK_MAVEN_URL="https://repo.maven.apache.org/maven2/org/apache/flink"
+RUN wget -P /opt/flink/lib/ ${FLINK_MAVEN_URL}/flink-json/${FLINK_VERSION}/flink-json-${FLINK_VERSION}.jar; \
+    wget -P /opt/flink/lib/ ${FLINK_MAVEN_URL}/flink-sql-connector-kafka/${FLINK_VERSION}/flink-sql-connector-kafka-${FLINK_VERSION}.jar;
+
+# Install iceberg and AWS dependencies
+ARG ICEBERG_MAVEN_URL="https://repo1.maven.org/maven2/org/apache/iceberg"
+RUN wget -P /opt/iceberg/lib $ICEBERG_MAVEN_URL/iceberg-flink-runtime-${ICEBERG_FLINK_RUNTIME_VERSION}/$ICEBERG_VERSION/iceberg-flink-runtime-${ICEBERG_FLINK_RUNTIME_VERSION}-${ICEBERG_VERSION}.jar;
+
+# Install AWS dependencies
+ARG AWS_SDK_VERSION="2.20.18"
+ARG AWS_MAVEN_URL="https://repo1.maven.org/maven2/software/amazon/awssdk"
+RUN wget -P /opt/awssdk/lib/ ${AWS_MAVEN_URL}/bundle/${AWS_SDK_VERSION}/bundle-${AWS_SDK_VERSION}.jar;
 RUN echo "taskmanager.memory.jvm-metaspace.size: 512m" >> /opt/flink/conf/flink-conf.yaml;
 WORKDIR /opt/flink
