@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  jobmanager:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        # If you update the flink version here, be sure to update the docker base image as well
+        FLINK_VERSION: "1.17.0"
+        PYTHON_VERSION: "3.10"
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    image: flink-eczachly-sreela-custom:latest
+    pull_policy: never
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    container_name: eczachly-flink-jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+    volumes:
+      - ./job_artifacts/:/opt/flink/usrlib
+
+  taskmanager:
+    image: flink-eczachly-sreela-custom:latest
+    pull_policy: never
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    container_name: eczachly-flink-taskmanager
+    scale: 1
+    volumes:
+      - ./job_artifacts/:/opt/flink/usrlib
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+        parallelism.default: 2
