@@ -37,4 +37,4 @@ down: ./Dockerfile
 
 ## Builds the flink base image with pyFlink and the flink-sql kafka connector installed
 build: ./Dockerfile
-	docker build --platform "linux/amd64,linux/arm64" -t ${IMAGE_NAME} .
+	docker build --platform linux/amd64 -t ${IMAGE_NAME} .
