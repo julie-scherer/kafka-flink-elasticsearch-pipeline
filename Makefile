@@ -32,9 +32,18 @@ up: ./Dockerfile
 
 ## Starts the Flink cluster, also builds the image if it has not been built yet
 down: ./Dockerfile
-	docker compose down
+	docker compose -f docker-compose.yml -f docker-compose-kafka-generator.yml down
 	docker rmi ${IMAGE_NAME}
 
 ## Builds the flink base image with pyFlink and the flink-sql kafka connector installed.
 build: ./Dockerfile
 	docker build --platform linux/amd64 -t ${IMAGE_NAME} .
+
+## Starts the Flink cluster, builds the pyflink image if it has not been built yet, creates a demo kafka topic to ingest from
+demo: ./Dockerfile
+	docker compose -f docker-compose.yml -f docker-compose-kafka-generator.yml up --remove-orphans -d
+
+## Removes unused artifacts from this setup
+clean: ./Dockerfile
+	docker rm eczachly-flink-*
+	docker rmi ${IMAGE_NAME}

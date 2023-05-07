@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
       args:
         # If you update the flink version here, be sure to update the docker base image as well
-        FLINK_VERSION: "1.17.0"
+        FLINK_VERSION: "1.16.0"
         PYTHON_VERSION: "3.10"
       platforms:
         - "linux/amd64"
