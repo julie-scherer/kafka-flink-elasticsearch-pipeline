@@ -26,7 +26,7 @@ services:
     platform: "linux/amd64"
     image: pyflink/pyflink:1.16.0-scala_2.12
     volumes:
-      - .:/opt/pyflink-walkthrough
+      - ./pyflink_jobs:/opt/pyflink_jobs
       - ./:/tmp/warehouse
     hostname: "jobmanager"
     expose:
@@ -40,7 +40,7 @@ services:
     image: pyflink/pyflink:1.16.0-scala_2.12
     platform: "linux/amd64"
     volumes:
-    - .:/opt/pyflink-walkthrough
+    - ./pyflink_jobs:/opt/pyflink_jobs
     expose:
       - "6121"
       - "6122"

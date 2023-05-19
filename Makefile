@@ -58,7 +58,7 @@ kafka-topic:
 
 ## Submit the PyFlink job
 job:
-	docker-compose exec jobmanager ./bin/flink run -py /opt/pyflink-walkthrough/payment_msg_processing.py -d
+	docker-compose exec jobmanager ./bin/flink run -py /opt/pyflink_jobs/payment_msg_processing.py -d
 
 
 ## Removes unused artifacts from this setup
