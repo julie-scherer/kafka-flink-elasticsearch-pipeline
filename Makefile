@@ -1,4 +1,6 @@
-IMAGE_NAME ?= flink-eczachly-sreela-custom:latest
+IMAGE_NAME ?= kafka-flink-iceberg:latest
+CONTAINER_NAME ?= flink-julie
+KAFKA_TOPIC ?= bootcamp-events
 
 # COLORS
 GREEN  := $(shell tput -Txterm setaf 2)
@@ -26,24 +28,43 @@ help:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
-## Starts the Flink cluster, also builds the image if it has not been built yet
-up: ./Dockerfile
-	docker compose up --remove-orphans -d
 
-## Shuts down the Flink cluster, cleans dangling images
-down: ./Dockerfile
-	docker compose -f docker-compose.yml -f docker-compose-kafka-generator.yml down
-	docker rmi ${IMAGE_NAME}
 
 ## Builds the flink base image with pyFlink and the flink-sql kafka connector installed.
-build: ./Dockerfile
-	docker build --platform linux/amd64 -t ${IMAGE_NAME} .
+# docker build --platform linux/amd64 -t ${IMAGE_NAME} .
+build:
+	docker-compose build 
 
-## Starts the Flink cluster, builds the pyflink image if it has not been built yet, creates a demo kafka topic to ingest from
-demo: ./Dockerfile
-	docker compose -f docker-compose.yml -f docker-compose-kafka-generator.yml up --remove-orphans -d
+
+## Starts the Flink cluster, also builds the image if it has not been built yet
+up:
+	docker compose up --remove-orphans -d
+
+
+## Shuts down the Flink cluster, cleans dangling images
+down: 
+	docker compose down
+
+
+## Checking Kafka service
+kafka-logs:
+	docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic payment_msg
+
+
+## Create a new Kafka topic
+kafka-topic:
+	docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --create --topic ${KAFKA_TOPIC} --partitions 8 --replication-factor 1
+
+
+## Submit the PyFlink job
+job:
+	docker-compose exec jobmanager ./bin/flink run -py /opt/pyflink-walkthrough/payment_msg_processing.py -d
+
 
 ## Removes unused artifacts from this setup
-clean: ./Dockerfile
-	docker rm eczachly-flink-*
+clean:
+	docker rm ${CONTAINER_NAME}
 	docker rmi ${IMAGE_NAME}
+
+
+# Source: https://github.com/apache/flink-playgrounds/tree/master/pyflink-walkthrough
